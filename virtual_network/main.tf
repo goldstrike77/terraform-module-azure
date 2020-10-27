@@ -14,12 +14,12 @@ resource "azurerm_virtual_network" "virtual_network" {
   location            = "var.location"
 
   tags = {
-      owner       = "lookup(var.tag, "owner")"
-      email       = "lookup(var.tag, "email")"
-      title       = "lookup(var.tag, "title")"
-      department  = "lookup(var.tag, "department")"
-      location    = "lookup(var.tag, "location")"
-      project     = "lookup(var.tag, "project")"
-      environment = "lookup(var.tag, "environment")"
+      owner       = "lookup(var.tag, owner)"
+      email       = "lookup(var.tag, email)"
+      title       = "lookup(var.tag, title)"
+      department  = "lookup(var.tag, department)"
+      location    = "lookup(var.tag, location)"
+      project     = "lookup(var.tag, project)"
+      environment = "lookup(var.tag, environment)"
     }
 }

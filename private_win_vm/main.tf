@@ -30,13 +30,13 @@ resource "azurerm_availability_set" "avset" {
   managed                      = true
 
   tags = {
-    owner       = "lookup(var.tag, "owner")"
-    email       = "lookup(var.tag, "email")"
-    title       = "lookup(var.tag, "title")"
-    department  = "lookup(var.tag, "department")"
-    location    = "lookup(var.tag, "location")"
-    project     = "lookup(var.tag, "project")"
-    environment = "lookup(var.tag, "environment")"
+    owner       = "lookup(var.tag, owner)"
+    email       = "lookup(var.tag, email)"
+    title       = "lookup(var.tag, title)"
+    department  = "lookup(var.tag, department)"
+    location    = "lookup(var.tag, location)"
+    project     = "lookup(var.tag, project)"
+    environment = "lookup(var.tag, environment)"
   }
 }
 
@@ -48,13 +48,13 @@ resource "azurerm_network_interface" "nic" {
   resource_group_name = "var.resource_group_name"
 
   tags = {
-    owner       = "lookup(var.tag, "owner")"
-    email       = "lookup(var.tag, "email")"
-    title       = "lookup(var.tag, "title")"
-    department  = "lookup(var.tag, "department")"
-    location    = "lookup(var.tag, "location")"
-    project     = "lookup(var.tag, "project")"
-    environment = "lookup(var.tag, "environment")"
+    owner       = "lookup(var.tag, owner)"
+    email       = "lookup(var.tag, email)"
+    title       = "lookup(var.tag, title)"
+    department  = "lookup(var.tag, department)"
+    location    = "lookup(var.tag, location)"
+    project     = "lookup(var.tag, project)"
+    environment = "lookup(var.tag, environment)"
   }
 
   ip_configuration {
