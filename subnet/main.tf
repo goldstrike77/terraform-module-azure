@@ -20,7 +20,7 @@ module "network_security_group" {
 
 resource "azurerm_subnet" "subnet" {
   name                      = "${var.subnet_names}"
-  depends_on                = ["module.network_security_group"]
+  depends_on                = [module.network_security_group]
   resource_group_name       = "${var.resource_group_name}"
   virtual_network_name      = "${var.virtual_network_name}"
   network_security_group_id = "${module.network_security_group.network_security_group_id}"

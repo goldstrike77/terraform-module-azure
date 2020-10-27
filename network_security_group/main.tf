@@ -10,7 +10,7 @@ module "virtual_network" {
 
 resource "azurerm_network_security_group" "security_group" {
   name                = "${var.nsg_name}"
-  depends_on          = ["module.virtual_network"]
+  depends_on          = [module.virtual_network]
   resource_group_name = "${var.resource_group_name}"
   location            = "${var.location}"
 
@@ -26,7 +26,7 @@ resource "azurerm_network_security_group" "security_group" {
 }
 
 resource "azurerm_network_security_rule" "security_rule" {
-  depends_on                  = ["azurerm_network_security_group.security_group"]
+  depends_on                  = [azurerm_network_security_group.security_group]
   resource_group_name         = "${var.resource_group_name}"
   network_security_group_name = "${azurerm_network_security_group.security_group.name}"
   count                       = "${length(var.nsgr_name)}"

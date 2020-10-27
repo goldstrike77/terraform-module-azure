@@ -6,6 +6,6 @@ variable "virtual_network_name" {}
 
 variable "virtual_network_cidr" {}
 
-variable "virtual_network_dns" {type = "list"}
+variable "virtual_network_dns" {type = list}
 
-variable "tag" {type = "map"}
+variable "tag" {type = map}

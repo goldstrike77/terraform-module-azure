@@ -22,7 +22,7 @@ module "subnet" {
 
 resource "azurerm_availability_set" "avset" {
   name                         = "${var.project_name}-AVSET"
-  depends_on                   = ["module.subnet"]
+  depends_on                   = [module.subnet]
   location                     = "${var.location}"
   resource_group_name          = "${var.resource_group_name}"
   platform_fault_domain_count  = 2
@@ -43,7 +43,7 @@ resource "azurerm_availability_set" "avset" {
 resource "azurerm_network_interface" "nic" {
   count               = "${length(var.linux_vm_name)}"
   name                = "AZ-${var.linux_vm_name[count.index]}-NIC"
-  depends_on          = ["azurerm_availability_set.avset"]
+  depends_on          = [azurerm_availability_set.avset]
   location            = "${var.location}"
   resource_group_name = "${var.resource_group_name}"
 
@@ -67,7 +67,7 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_virtual_machine" "vm" {
   count                 = "${length(var.linux_vm_name)}"
   name                  = "${var.linux_vm_name[count.index]}"
-  depends_on            = ["azurerm_network_interface.nic", "azurerm_availability_set.avset"]
+  depends_on            = [azurerm_network_interface.nic, azurerm_availability_set.avset]
   location              = "${var.location}"
   resource_group_name   = "${var.resource_group_name}"
   availability_set_id   = "${azurerm_availability_set.avset.id}"

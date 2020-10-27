@@ -7,47 +7,47 @@ variable "virtual_network_name" {}
 variable "virtual_network_cidr" {}
 
 variable "virtual_network_dns" {
-  type = "list"
+  type = list
 }
 
 variable "nsg_name" {}
 
 variable "nsgr_name" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_priority" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_direction" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_access" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_prot" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_sour_port" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_dest_port" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_sour_addr" {
-  type = "list"
+  type = list
 }
 
 variable "nsgr_dest_addr" {
-  type = "list"
+  type = list
 }
 
 variable "tag" {
-  type = "map"
+  type = map
 }
