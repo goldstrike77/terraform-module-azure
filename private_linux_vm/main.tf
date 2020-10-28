@@ -21,14 +21,13 @@ module "subnet" {
 }
 
 resource "azurerm_availability_set" "avset" {
-  name                         = "var.project_name}-AVSET"
+  name                         = "AVSET-var.project_name"
   depends_on                   = [module.subnet]
   location                     = "var.location"
   resource_group_name          = "var.resource_group_name"
   platform_fault_domain_count  = 2
   platform_update_domain_count = 5
   managed                      = true
-
   tags = {
     owner       = "lookup(var.tag, owner)"
     email       = "lookup(var.tag, email)"
@@ -42,11 +41,10 @@ resource "azurerm_availability_set" "avset" {
 
 resource "azurerm_network_interface" "nic" {
   count               = "length(var.linux_vm_name)"
-  name                = "AZ-${var.linux_vm_name[count.index]}-NIC"
+  name                = "NIC-var.linux_vm_name[count.index]"
   depends_on          = [azurerm_availability_set.avset]
   location            = "var.location"
   resource_group_name = "var.resource_group_name"
-
   tags = {
     owner       = "lookup(var.tag, owner)"
     email       = "lookup(var.tag, email)"
@@ -56,9 +54,8 @@ resource "azurerm_network_interface" "nic" {
     project     = "lookup(var.tag, project)"
     environment = "lookup(var.tag, environment)"
   }
-
   ip_configuration {
-    name                          = "AZ-IP-${var.linux_vm_name[count.index]}-LAN"
+    name                          = "LAN-var.linux_vm_name[count.index]"
     subnet_id                     = "module.subnet.azurerm_subnet_id"
     private_ip_address_allocation = "dynamic"
   }
@@ -73,7 +70,6 @@ resource "azurerm_virtual_machine" "vm" {
   availability_set_id   = "azurerm_availability_set.avset.id"
   network_interface_ids = ["element(azurerm_network_interface.nic.*.id, count.index)"]
   vm_size               = "var.linux_vm_size[count.index]"
-
   storage_os_disk {
     name              = "var.linux_vm_name[count.index]}-OS-Disc0"
     caching           = "ReadWrite"
@@ -81,7 +77,6 @@ resource "azurerm_virtual_machine" "vm" {
     create_option     = "FromImage"
     managed_disk_type = "var.linux_disc_type[count.index]"
   }
-
   storage_data_disk {
     name              = "var.linux_vm_name[count.index]}-DT-Disc0"
     managed_disk_type = "var.linux_disc_type[count.index]"
@@ -89,29 +84,24 @@ resource "azurerm_virtual_machine" "vm" {
     lun               = 0
     disk_size_gb      = "var.linux_disc_size[count.index]"
   }
-
   storage_image_reference {
     publisher = "var.linux_vm_publisher"
     offer     = "var.linux_vm_offer"
     sku       = "var.linux_vm_sku"
     version   = "var.linux_vm_version"
   }
-
   os_profile {
     computer_name  = "var.linux_vm_name[count.index]"
     admin_username = "var.vm_admin_username"
     admin_password = "var.vm_admin_password"
   }
-
   os_profile_linux_config {
     disable_password_authentication = "false"
-
     ssh_keys {
-      path     = "/home/${var.vm_admin_username}/.ssh/authorized_keys"
+      path     = "/home/var.vm_admin_username/.ssh/authorized_keys"
       key_data = "var.linux_vm_sshcert"
     }
   }
-
   tags = {
     owner       = "lookup(var.tag, owner)"
     email       = "lookup(var.tag, email)"

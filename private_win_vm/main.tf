@@ -21,7 +21,7 @@ module "subnet" {
 }
 
 resource "azurerm_availability_set" "avset" {
-  name                         = "var.project_name}-AVSET"
+  name                         = "var.project_name-AVSET"
   depends_on                   = [module.subnet]
   location                     = "var.location"
   resource_group_name          = "var.resource_group_name"
@@ -58,7 +58,7 @@ resource "azurerm_network_interface" "nic" {
   }
 
   ip_configuration {
-    name                          = "AZ-IP-${var.win_vm_name[count.index]}-LAN"
+    name                          = "AZ-IP-var.win_vm_name[count.index]-LAN"
     subnet_id                     = "module.subnet.azurerm_subnet_id"
     private_ip_address_allocation = "dynamic"
   }
@@ -67,7 +67,7 @@ resource "azurerm_network_interface" "nic" {
 resource "azurerm_virtual_machine" "vm" {
   count                 = "length(var.win_vm_name)"
   name                  = "var.win_vm_name[count.index]"
-  depends_on            = [azurerm_network_interface.nic", "azurerm_availability_set.avset]
+  depends_on            = [azurerm_network_interface.nic, azurerm_availability_set.avset]
   location              = "var.location"
   resource_group_name   = "var.resource_group_name"
   availability_set_id   = "azurerm_availability_set.avset.id"
@@ -108,13 +108,13 @@ resource "azurerm_virtual_machine" "vm" {
   }
 
   tags = {
-    owner       = "lookup(var.tag, "owner")"
-    email       = "lookup(var.tag, "email")"
-    title       = "lookup(var.tag, "title")"
-    department  = "lookup(var.tag, "department")"
-    location    = "lookup(var.tag, "location")"
-    project     = "lookup(var.tag, "project")"
-    environment = "lookup(var.tag, "environment")"
+    owner       = "lookup(var.tag, owner)"
+    email       = "lookup(var.tag, email)"
+    title       = "lookup(var.tag, title)"
+    department  = "lookup(var.tag, department)"
+    location    = "lookup(var.tag, location)"
+    project     = "lookup(var.tag, project)"
+    environment = "lookup(var.tag, environment)"
   }
 }
 
@@ -135,7 +135,6 @@ resource "azurerm_virtual_machine_extension" "vm" {
     "commandToExecute": "powershell.exe -ExecutionPolicy Unrestricted -File ConfigureRemotingForAnsible.ps1"
   }
 WINRM_SETTINGS
-
   settings = <<TIMEZONE_SETTINGS
   {
     "commandToExecute": "powershell.exe Set-TimeZone -Name "China Standard Time""
