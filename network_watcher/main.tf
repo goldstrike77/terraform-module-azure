@@ -1,8 +1,6 @@
-resource "azurerm_virtual_network" "virtual_network" {
-  name                = "AZ-VN-${var.customer}-${var.environment}-${var.project}"
+resource "azurerm_network_watcher" "network_watcher" {
+  name                = "AZ-NW-${var.customer}-${var.environment}-${var.project}"
   resource_group_name = "AZ-RG-${var.customer}-${var.environment}-${var.project}"
-  address_space       = [var.virtual_network_cidr]
-  dns_servers         = var.virtual_network_dns
   location            = var.location
   tags                = {
     location    = var.location
