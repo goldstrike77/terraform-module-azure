@@ -1,6 +1,6 @@
 resource "azurerm_network_security_group" "security_group" {
   name                = "AZ-NSG-${var.customer}-${var.environment}-${var.project}"
-  resource_group_name = "AZ-RG-${var.customer}-${var.environment}-${var.project}"
+  resource_group_name = "AZ-RG-${var.customer}-${var.environment}"
   location            = var.location
   tags                = {
     location    = var.location
@@ -18,7 +18,7 @@ resource "azurerm_network_security_group" "security_group" {
 
 resource "azurerm_network_security_rule" "security_rule" {
   depends_on                  = [azurerm_network_security_group.security_group]
-  resource_group_name         = "AZ-RG-${var.customer}-${var.environment}-${var.project}"
+  resource_group_name         = "AZ-RG-${var.customer}-${var.environment}"
   network_security_group_name = azurerm_network_security_group.security_group.name
   count                       = length(var.nsgr_name)
   name                        = var.nsgr_name[count.index]

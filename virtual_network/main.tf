@@ -1,13 +1,12 @@
 resource "azurerm_virtual_network" "virtual_network" {
-  name                = "AZ-VN-${var.customer}-${var.environment}-${var.project}"
-  resource_group_name = "AZ-RG-${var.customer}-${var.environment}-${var.project}"
+  name                = "AZ-VN-${var.customer}-${var.environment}"
+  resource_group_name = "AZ-RG-${var.customer}-${var.environment}"
   address_space       = [var.virtual_network_cidr]
   dns_servers         = var.virtual_network_dns
   location            = var.location
   tags                = {
     location    = var.location
     environment = var.environment
-    project     = var.project
     customer    = var.customer
     owner       = lookup(var.tag, var.tag.owner, "somebody")
     email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
