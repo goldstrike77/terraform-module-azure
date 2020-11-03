@@ -1,5 +1,5 @@
 resource "azurerm_virtual_network" "virtual_network" {
-  name                = "AZ-VN-${var.customer}-${var.environment}"
+  name                = "AZ-VNet-${var.customer}-${var.environment}"
   resource_group_name = "AZ-RG-${var.customer}-${var.environment}"
   address_space       = [var.virtual_network_cidr]
   dns_servers         = var.virtual_network_dns

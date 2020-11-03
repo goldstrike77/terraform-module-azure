@@ -20,14 +20,14 @@ resource "azurerm_network_security_rule" "security_rule" {
   depends_on                  = [azurerm_network_security_group.security_group]
   resource_group_name         = "AZ-RG-${var.customer}-${var.environment}"
   network_security_group_name = azurerm_network_security_group.security_group.name
-  count                       = length(var.nsgr_name)
-  name                        = var.nsgr_name[count.index]
-  priority                    = var.nsgr_priority[count.index]
-  direction                   = var.nsgr_direction[count.index]
-  access                      = var.nsgr_access[count.index]
-  protocol                    = var.nsgr_prot[count.index]
-  source_port_range           = var.nsgr_sour_port[count.index]
-  destination_port_range      = var.nsgr_dest_port[count.index]
-  source_address_prefix       = var.nsgr_sour_addr[count.index]
-  destination_address_prefix  = var.nsgr_dest_addr[count.index]
+  for_each                    = var.security_group_rules 
+  name                        = each.key
+  direction                   = each.value.direction
+  access                      = each.value.access
+  priority                    = each.value.priority
+  protocol                    = each.value.protocol
+  source_port_range           = each.value.source_port_range
+  destination_port_range      = each.value.destination_port_range
+  source_address_prefix       = each.value.source_address_prefix
+  destination_address_prefix  = each.value.destination_address_prefix
 }

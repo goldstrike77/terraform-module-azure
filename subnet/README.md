@@ -4,15 +4,15 @@
 #### Usage
 ```hcl
 module "subnet" {
-  depends_on           = [module.network_security_group]
-  source               = "git::https://github.com/goldstrike77/terraform-module-azure//subnet?ref=v0.1"
-  depends_on           = [module.network_security_group]
-  location             = var.location
-  environment          = var.environment
-  project              = var.project
-  customer             = var.customer
-  tag                  = var.tag
-  subnet_prefixes      = var.subnet_prefixes
-  nsg_id               = module.network_security_group.network_security_group_id
+  depends_on         = [module.network_security_group]
+  source             = "git::https://github.com/goldstrike77/terraform-module-azure//subnet?ref=v0.1"
+  location           = var.location
+  environment        = var.environment
+  project            = var.project
+  customer           = var.customer
+  tag                = var.tag
+  subnet_prefixes    = var.subnet_prefixes
+  security_group_ass = var.security_group_ass
+  security_group_id  = ( var.security_group_ass ? module.network_security_group[0].net_security_group_id : 0 )
 }
 ```
