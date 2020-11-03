@@ -1,10 +1,10 @@
 resource "azurerm_resource_group" "resource_group" {
-  name     = "AZ-RG-${var.customer}-${var.environment}"
+  name     = "AZ-RG-${title(var.customer)}-${lower(var.environment)}"
   location = var.location
   tags     = {
-    location    = var.location
-    environment = var.environment
-    customer    = var.customer
+    location    = lower(var.location)
+    environment = lower(var.environment)
+    customer    = title(var.customer)
     owner       = lookup(var.tag, var.tag.owner, "somebody")
     email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
     title       = lookup(var.tag, var.tag.title, "Engineer")

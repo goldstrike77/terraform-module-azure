@@ -1,61 +1,43 @@
-module "subnet" {
-  source               = "../subnet"
-  resource_group_name  = "var.resource_group_name"
-  location             = "var.location"
-  virtual_network_name = "var.virtual_network_name"
-  virtual_network_cidr = "var.virtual_network_cidr"
-  virtual_network_dns  = "var.virtual_network_dns"
-  nsg_name             = "var.nsg_name"
-  nsgr_name            = "var.nsgr_name"
-  nsgr_priority        = "var.nsgr_priority"
-  nsgr_direction       = "var.nsgr_direction"
-  nsgr_access          = "var.nsgr_access"
-  nsgr_prot            = "var.nsgr_prot"
-  nsgr_sour_port       = "var.nsgr_sour_port"
-  nsgr_dest_port       = "var.nsgr_dest_port"
-  nsgr_sour_addr       = "var.nsgr_sour_addr"
-  nsgr_dest_addr       = "var.nsgr_dest_addr"
-  subnet_names         = "var.subnet_names"
-  subnet_prefixes      = "var.subnet_prefixes"
-  tag                  = "var.tag"
-}
-
 resource "azurerm_availability_set" "avset" {
-  name                         = "AVSET-var.project_name"
-  depends_on                   = [module.subnet]
-  location                     = "var.location"
-  resource_group_name          = "var.resource_group_name"
+  name                         = "AZ-AVset-${title(var.customer)}-${lower(var.environment)}-${title(var.project)}"
+  location                     = var.location
+  resource_group_name          = "AZ-RG-${title(var.customer)}-${lower(var.environment)}"
   platform_fault_domain_count  = 2
   platform_update_domain_count = 5
   managed                      = true
-  tags = {
-    owner       = "lookup(var.tag, owner)"
-    email       = "lookup(var.tag, email)"
-    title       = "lookup(var.tag, title)"
-    department  = "lookup(var.tag, department)"
-    location    = "lookup(var.tag, location)"
-    project     = "lookup(var.tag, project)"
-    environment = "lookup(var.tag, environment)"
+  tags                         = {
+    location    = lower(var.location)
+    environment = lower(var.environment)
+    project     = var.project
+    customer    = title(var.customer)
+    owner       = lookup(var.tag, var.tag.owner, "somebody")
+    email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
+    title       = lookup(var.tag, var.tag.title, "Engineer")
+    department  = lookup(var.tag, var.tag.department, "IS")
+    costcenter  = lookup(var.tag, var.tag.costcenter, "xx")
+    requestor   = lookup(var.tag, var.tag.requestor, "somebody@mail.com")
   }
 }
 
 resource "azurerm_network_interface" "nic" {
   count               = "length(var.linux_vm_name)"
   name                = "NIC-var.linux_vm_name[count.index]"
-  depends_on          = [azurerm_availability_set.avset]
-  location            = "var.location"
-  resource_group_name = "var.resource_group_name"
-  tags = {
-    owner       = "lookup(var.tag, owner)"
-    email       = "lookup(var.tag, email)"
-    title       = "lookup(var.tag, title)"
-    department  = "lookup(var.tag, department)"
-    location    = "lookup(var.tag, location)"
-    project     = "lookup(var.tag, project)"
-    environment = "lookup(var.tag, environment)"
+  location            = var.location
+  resource_group_name = "AZ-RG-${title(var.customer)}-${lower(var.environment)}"
+  tags                = {
+    location    = lower(var.location)
+    environment = lower(var.environment)
+    project     = var.project
+    customer    = title(var.customer)
+    owner       = lookup(var.tag, var.tag.owner, "somebody")
+    email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
+    title       = lookup(var.tag, var.tag.title, "Engineer")
+    department  = lookup(var.tag, var.tag.department, "IS")
+    costcenter  = lookup(var.tag, var.tag.costcenter, "xx")
+    requestor   = lookup(var.tag, var.tag.requestor, "somebody@mail.com")
   }
   ip_configuration {
-    name                          = "LAN-var.linux_vm_name[count.index]"
+    name                          = "LAN-${title(var.customer)}-${lower(var.environment)}-${title(var.project)}[count.index]"
     subnet_id                     = "module.subnet.azurerm_subnet_id"
     private_ip_address_allocation = "dynamic"
   }
@@ -63,7 +45,7 @@ resource "azurerm_network_interface" "nic" {
 
 resource "azurerm_virtual_machine" "vm" {
   count                 = "length(var.linux_vm_name)"
-  name                  = "var.linux_vm_name[count.index]"
+  name                  = ${title(var.customer)}-${lower(var.environment)}-${title(var.project)}-[count.index]
   depends_on            = [azurerm_network_interface.nic, azurerm_availability_set.avset]
   location              = "var.location"
   resource_group_name   = "var.resource_group_name"
@@ -102,13 +84,16 @@ resource "azurerm_virtual_machine" "vm" {
       key_data = "var.linux_vm_sshcert"
     }
   }
-  tags = {
-    owner       = "lookup(var.tag, owner)"
-    email       = "lookup(var.tag, email)"
-    title       = "lookup(var.tag, title)"
-    department  = "lookup(var.tag, department)"
-    location    = "lookup(var.tag, location)"
-    project     = "lookup(var.tag, project)"
-    environment = "lookup(var.tag, environment)"
+  tags                = {
+    location    = lower(var.location)
+    environment = lower(var.environment)
+    project     = var.project
+    customer    = title(var.customer)
+    owner       = lookup(var.tag, var.tag.owner, "somebody")
+    email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
+    title       = lookup(var.tag, var.tag.title, "Engineer")
+    department  = lookup(var.tag, var.tag.department, "IS")
+    costcenter  = lookup(var.tag, var.tag.costcenter, "xx")
+    requestor   = lookup(var.tag, var.tag.requestor, "somebody@mail.com")
   }
 }

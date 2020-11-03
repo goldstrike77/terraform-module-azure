@@ -1,7 +1,7 @@
 resource "azurerm_subnet" "subnet" {
-  name                      = "AZ-SNet-${var.customer}-${var.environment}-${var.project}"
-  resource_group_name       = "AZ-RG-${var.customer}-${var.environment}"
-  virtual_network_name      = "AZ-VNet-${var.customer}-${var.environment}"
+  name                      = "AZ-SNet-${title(var.customer)}-${lower(var.environment)}-${title(var.project)}"
+  resource_group_name       = "AZ-RG-${title(var.customer)}-${lower(var.environment)}"
+  virtual_network_name      = "AZ-VNet-${title(var.customer)}-${lower(var.environment)}"
   address_prefixes          = [var.subnet_prefixes]
 }
 
