@@ -9,6 +9,7 @@ locals {
         offer     = s.offer
         sku       = s.sku
         version   = s.version
+        public_ip = s.public_ip
         disc_type = s.disc_type
         disc_size = s.disc_size
         index     = i
@@ -18,7 +19,7 @@ locals {
 }
 
 resource "azurerm_availability_set" "avset" {
-  name                         = "AZ-AVset-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
+  name                         = "AZ-AVset-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-Linux"
   location                     = var.location
   resource_group_name          = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   platform_fault_domain_count  = 2
@@ -38,8 +39,30 @@ resource "azurerm_availability_set" "avset" {
   }
 }
 
+resource "azurerm_public_ip" "public_ip" {
+  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.public_ip && s.type == "linux" }
+  name                = "AZ-WAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
+  location            = var.location
+  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  sku                 = "Standard"
+  allocation_method   = "Static"
+  tags                         = {
+    location    = lower(var.location)
+    environment = title(var.environment)
+    project     = title(var.project)
+    customer    = title(var.customer)
+    owner       = lookup(var.tag, var.tag.owner, "somebody")
+    email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
+    title       = lookup(var.tag, var.tag.title, "Engineer")
+    department  = lookup(var.tag, var.tag.department, "IS")
+    costcenter  = lookup(var.tag, var.tag.costcenter, "xx")
+    requestor   = lookup(var.tag, var.tag.requestor, "somebody@mail.com")
+  }
+}
+
 resource "azurerm_network_interface" "nic" {
-  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s }
+  depends_on          = [azurerm_public_ip.public_ip]
+  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.type == "linux" }
   name                = "AZ-NIC-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
   location            = var.location
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
@@ -59,12 +82,13 @@ resource "azurerm_network_interface" "nic" {
     name                          = "AZ-LAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "dynamic"
+    public_ip_address_id          = each.value.public_ip ? azurerm_public_ip.public_ip[each.key].id : null
   }
 }
 
 resource "azurerm_linux_virtual_machine" "vm" {
   depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset]
-  for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s }
+  for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "linux" }
   name                            = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}"
   location                        = var.location
   resource_group_name             = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
@@ -86,6 +110,9 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = each.value.sku
     version   = each.value.version
   }
+  boot_diagnostics {
+    storage_account_uri = var.primary_blob_endpoint
+  }
   tags          = {
     location    = lower(var.location)
     environment = title(var.environment)
@@ -102,7 +129,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
 
 resource "azurerm_managed_disk" "data_disc" {
   depends_on           = [azurerm_linux_virtual_machine.vm]
-  for_each             = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 }
+  for_each             = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 && s.type == "linux" }
   name                 = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}-DT-Disc0"
   location             = var.location
   resource_group_name  = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
@@ -113,7 +140,7 @@ resource "azurerm_managed_disk" "data_disc" {
 
 resource "azurerm_virtual_machine_data_disk_attachment" "data_disk_attachment" {
   depends_on         = [azurerm_managed_disk.data_disc]
-  for_each           = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 }
+  for_each           = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 && s.type == "linux" }
   managed_disk_id    = azurerm_managed_disk.data_disc[each.key].id
   virtual_machine_id = azurerm_linux_virtual_machine.vm[each.key].id
   lun                = "0"
