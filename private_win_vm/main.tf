@@ -21,7 +21,7 @@ module "subnet" {
 }
 
 resource "azurerm_availability_set" "avset" {
-  name                         = "var.project_name-AVSET"
+  name                         = "title(var.project)_name-AVSET"
   depends_on                   = [module.subnet]
   location                     = "var.location"
   resource_group_name          = "var.resource_group_name"

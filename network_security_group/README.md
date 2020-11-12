@@ -9,7 +9,7 @@ module "network_security_group" {
   source               = "git::https://github.com/goldstrike77/terraform-module-azure//network_security_grou?ref=v0.1"
   location             = var.location
   environment          = var.environment
-  project              = var.project
+  project              = title(var.project)
   customer             = var.customer
   tag                  = var.tag
   security_group_rules = var.security_group_rules

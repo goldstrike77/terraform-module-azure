@@ -8,7 +8,7 @@ module "subnet" {
   source             = "git::https://github.com/goldstrike77/terraform-module-azure//subnet?ref=v0.1"
   location           = var.location
   environment        = var.environment
-  project            = var.project
+  project            = title(var.project)
   customer           = var.customer
   tag                = var.tag
   subnet_prefixes    = var.subnet_prefixes
