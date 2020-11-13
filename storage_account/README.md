@@ -1,13 +1,15 @@
-#### Resource Groups can be imported using the resource id.
-`terraform import module.resource_group.azurerm_resource_group.resource_group /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-prd`
+#### Storage Accounts can be imported using the resource id.
+`terraform import module.resazurerm_storage_account.azurerm_resazurerm_storage_account.storage_account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-Prd/providers/Microsoft.Storage/storageAccounts/azsainfrapbootdiag`
 
 #### Usage
 ```hcl
-module "resource_group" {
-  source      = "git::https://github.com/goldstrike77/terraform-module-azure//resource_group?ref=v0.1"
-  location    = lower(var.location)
-  environment = title(var.environment)
-  customer    = title(var.customer)
+module "storage_account" {
+  depends_on  = [module.resource_group]
+  source      = "../../../terraform-module-azure/storage_account"
+  location    = var.location
+  environment = var.environment
+  customer    = var.customer
   tag         = var.tag
+  sa_spec     = var.sa_spec
 }
 ```

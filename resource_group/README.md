@@ -4,10 +4,10 @@
 #### Usage
 ```hcl
 module "resource_group" {
-  source      = "git::https://github.com/goldstrike77/terraform-module-azure//resource_group?ref=v0.1"
-  location    = lower(var.location)
-  environment = title(var.environment)
-  customer    = title(var.customer)
+  source      = "../../../terraform-module-azure/resource_group"
+  location    = var.location
+  environment = var.environment
+  customer    = var.customer
   tag         = var.tag
 }
 ```

@@ -6,12 +6,13 @@
 module "network_security_group" {
   count                = var.security_group_ass ? 1 : 0
   depends_on           = [module.resource_group,module.virtual_network]
-  source               = "git::https://github.com/goldstrike77/terraform-module-azure//network_security_grou?ref=v0.1"
+  source               = "../../../terraform-module-azure/network_security_group"
   location             = var.location
   environment          = var.environment
-  project              = title(var.project)
+  project              = var.project
   customer             = var.customer
   tag                  = var.tag
   security_group_rules = var.security_group_rules
 }
+
 ```
