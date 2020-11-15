@@ -1,5 +1,5 @@
 #### Network Security Groups can be imported using the resource id.
-`terraform import module.network_security_group.azurerm_network_security_group.security_group /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-prd/providers/Microsoft.Network/networkSecurityGroups/AZ-NSG-Infra-prd-Monitor`
+    terraform import module.network_security_group.azurerm_network_security_group.security_group /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-prd/providers/Microsoft.Network/networkSecurityGroups/AZ-NSG-Infra-prd-Monitor
 
 #### Usage
 ```hcl

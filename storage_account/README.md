@@ -1,5 +1,5 @@
 #### Storage Accounts can be imported using the resource id.
-`terraform import module.resazurerm_storage_account.azurerm_resazurerm_storage_account.storage_account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-Prd/providers/Microsoft.Storage/storageAccounts/azsainfrapbootdiag`
+    terraform import module.resazurerm_storage_account.azurerm_resazurerm_storage_account.storage_account /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-Prd/providers/Microsoft.Storage/storageAccounts/azsainfrapbootdiag
 
 #### Usage
 ```hcl

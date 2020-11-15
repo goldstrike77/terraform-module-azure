@@ -1,5 +1,5 @@
 #### Subnets can be imported using the resource id.
-`terraform import module.subnet.azurerm_subnet.subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-prd/providers/Microsoft.Network/virtualNetworks/AZ-VN-Infra-prd/subnets/AZ-SN-Infra-prd-Monitor`
+    terraform import module.subnet.azurerm_subnet.subnet /subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/AZ-RG-Infra-prd/providers/Microsoft.Network/virtualNetworks/AZ-VN-Infra-prd/subnets/AZ-SN-Infra-prd-Monitor
 
 #### Usage
 ```hcl
