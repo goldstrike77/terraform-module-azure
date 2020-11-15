@@ -30,7 +30,7 @@ data "azurerm_storage_account" "storage_account" {
 
 # 创建可用性集。
 resource "azurerm_availability_set" "avset" {
-  name                         = "AZ-AVset-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-Linux"
+  name                         = "AZ-AVset-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
   location                     = var.location
   resource_group_name          = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   platform_fault_domain_count  = 2
