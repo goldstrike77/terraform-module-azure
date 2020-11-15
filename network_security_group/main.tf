@@ -1,21 +1,12 @@
+# 创建网络安全组。
 resource "azurerm_network_security_group" "security_group" {
   name                = "AZ-NSG-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   location            = var.location
-  tags                = {
-    location    = lower(var.location)
-    environment = title(var.environment)
-    project     = title(var.project)
-    customer    = title(var.customer)
-    owner       = lookup(var.tag, var.tag.owner, "somebody")
-    email       = lookup(var.tag, var.tag.email, "somebody@mail.com")
-    title       = lookup(var.tag, var.tag.title, "Engineer")
-    department  = lookup(var.tag, var.tag.department, "IS")
-    costcenter  = lookup(var.tag, var.tag.costcenter, "xx")
-    requestor   = lookup(var.tag, var.tag.requestor, "somebody@mail.com")
-  }
+  tags                = var.tag
 }
 
+# 创建网络安全组规则。
 resource "azurerm_network_security_rule" "security_rule" {
   depends_on                  = [azurerm_network_security_group.security_group]
   resource_group_name         = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
