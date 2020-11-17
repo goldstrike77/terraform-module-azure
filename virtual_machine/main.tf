@@ -11,7 +11,7 @@ locals {
         offer                  = s.offer
         sku                    = s.sku
         version                = s.version
-        public_ip              = s.public_ip
+        vm_public_ip           = s.vm_public_ip
         ip_forwarding          = s.ip_forwarding
         accelerated_networking = s.accelerated_networking
         disc_type              = s.disc_type
@@ -57,8 +57,8 @@ resource "azurerm_backup_policy_vm" "backup_policy_vm" {
 
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip" {
-  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.public_ip }
-  name                = "AZ-WAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
+  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.vm_public_ip }
+  name                = "AZ-VM-WAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
   location            = var.location
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   sku                 = "Standard"
@@ -80,7 +80,7 @@ resource "azurerm_network_interface" "nic" {
     name                          = "AZ-LAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = each.value.public_ip ? azurerm_public_ip.public_ip[each.key].id : null
+    public_ip_address_id          = each.value.vm_public_ip ? azurerm_public_ip.public_ip[each.key].id : null
   }
 }
 
