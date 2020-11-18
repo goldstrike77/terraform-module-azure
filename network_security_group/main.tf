@@ -1,7 +1,7 @@
 # 创建网络安全组。
 resource "azurerm_network_security_group" "security_group" {
-  name                = "AZ-NSG-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  name                = "AZ-NSG-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   location            = var.location
   tags                = var.tag
 }
@@ -9,7 +9,7 @@ resource "azurerm_network_security_group" "security_group" {
 # 创建网络安全组规则。
 resource "azurerm_network_security_rule" "security_rule" {
   depends_on                  = [azurerm_network_security_group.security_group]
-  resource_group_name         = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name         = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   network_security_group_name = azurerm_network_security_group.security_group.name
   for_each                    = var.security_group_rules
   name                        = each.key

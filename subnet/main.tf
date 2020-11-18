@@ -1,8 +1,8 @@
 # 创建子网。
 resource "azurerm_subnet" "subnet" {
-  name                      = "AZ-SNet-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
-  resource_group_name       = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
-  virtual_network_name      = "AZ-VNet-${title(var.customer)}-${title(var.environment)}"
+  name                      = "AZ-SNet-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}"
+  resource_group_name       = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
+  virtual_network_name      = "AZ-VNet-${title(var.customer)}-${upper(var.environment)}"
   address_prefixes          = [var.subnet_prefixes]
 }
 

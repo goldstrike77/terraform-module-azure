@@ -25,14 +25,14 @@ locals {
 # 获取虚拟机启动诊断存储账户名称。
 data "azurerm_storage_account" "storage_account" {
   name                = "azsa${lower(var.customer)}${lower(substr(var.environment,0,1))}bootdiag"
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
 }
 
 # 创建可用性集。
 resource "azurerm_availability_set" "avset" {
-  name                         = "AZ-AVset-${title(var.customer)}-${title(var.environment)}-${title(var.project)}"
+  name                         = "AZ-AVset-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}"
   location                     = var.location
-  resource_group_name          = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name          = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   platform_fault_domain_count  = 2
   platform_update_domain_count = 5
   managed                      = true
@@ -43,8 +43,8 @@ resource "azurerm_availability_set" "avset" {
 resource "azurerm_backup_policy_vm" "backup_policy_vm" {
   depends_on          = [azurerm_linux_virtual_machine.vm,azurerm_windows_virtual_machine.vm]
   name                = "AZ-BPVM-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}"
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
-  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
+  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${upper(var.environment)}"
   timezone            = var.vm_backup_timezone
   backup {
     frequency = title(var.vm_backup_frequency)
@@ -58,9 +58,9 @@ resource "azurerm_backup_policy_vm" "backup_policy_vm" {
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip" {
   for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.vm_public_ip }
-  name                = "AZ-VM-WAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
+  name                = "AZ-VM-WAN-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}-${each.key}"
   location            = var.location
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   sku                 = "Standard"
   allocation_method   = "Static"
   tags                = var.tag
@@ -70,14 +70,14 @@ resource "azurerm_public_ip" "public_ip" {
 resource "azurerm_network_interface" "nic" {
   depends_on                    = [azurerm_public_ip.public_ip]
   for_each                      = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s }
-  name                          = "AZ-NIC-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
+  name                          = "AZ-NIC-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}-${each.key}"
   location                      = var.location
-  resource_group_name           = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name           = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   enable_ip_forwarding          = each.value.ip_forwarding
   enable_accelerated_networking = each.value.accelerated_networking
   tags                          = var.tag
   ip_configuration {
-    name                          = "AZ-LAN-${title(var.customer)}-${title(var.environment)}-${title(var.project)}-${each.key}"
+    name                          = "AZ-LAN-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}-${each.key}"
     subnet_id                     = var.subnet_id
     private_ip_address_allocation = "dynamic"
     public_ip_address_id          = each.value.vm_public_ip ? azurerm_public_ip.public_ip[each.key].id : null
@@ -90,7 +90,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
   for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "linux" }
   name                            = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}"
   location                        = var.location
-  resource_group_name             = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name             = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   availability_set_id             = azurerm_availability_set.avset.id
   network_interface_ids           = [azurerm_network_interface.nic[each.key].id]
   size                            = each.value.size
@@ -121,7 +121,7 @@ resource "azurerm_managed_disk" "linux_data_disc" {
   for_each             = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 && s.type == "linux" }
   name                 = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}-DT-Disc0"
   location             = var.location
-  resource_group_name  = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name  = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   storage_account_type = each.value.disc_type
   create_option        = "Empty"
   disk_size_gb         = each.value.disc_size
@@ -142,8 +142,8 @@ resource "azurerm_virtual_machine_data_disk_attachment" "linux_data_disk_attachm
 resource "azurerm_backup_protected_vm" "backup_protected_linux_vm" {
   depends_on          = [azurerm_backup_policy_vm.backup_policy_vm]
   for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.backup && s.type == "linux" }
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
-  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
+  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${upper(var.environment)}"
   source_vm_id        = azurerm_linux_virtual_machine.vm[each.key].id
   backup_policy_id    = azurerm_backup_policy_vm.backup_policy_vm.id
 }
@@ -154,7 +154,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
   for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "windows" }
   name                            = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}"
   location                        = var.location
-  resource_group_name             = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name             = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   availability_set_id             = azurerm_availability_set.avset.id
   network_interface_ids           = [azurerm_network_interface.nic[each.key].id]
   size                            = each.value.size
@@ -184,7 +184,7 @@ resource "azurerm_managed_disk" "windows_data_disc" {
   for_each             = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.disc_size > 0 && s.type == "windows" }
   name                 = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}-DT-Disc0"
   location             = var.location
-  resource_group_name  = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name  = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
   storage_account_type = each.value.disc_type
   create_option        = "Empty"
   disk_size_gb         = each.value.disc_size
@@ -205,8 +205,8 @@ resource "azurerm_virtual_machine_data_disk_attachment" "windows_data_disk_attac
 resource "azurerm_backup_protected_vm" "backup_protected_windows_vm" {
   depends_on          = [azurerm_backup_policy_vm.backup_policy_vm]
   for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.backup && s.type == "windows" }
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
-  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(var.environment)}"
+  recovery_vault_name = "AZ-RSV-${title(var.customer)}-${upper(var.environment)}"
   source_vm_id        = azurerm_windows_virtual_machine.vm[each.key].id
   backup_policy_id    = azurerm_backup_policy_vm.backup_policy_vm.id
 }
