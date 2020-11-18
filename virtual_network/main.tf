@@ -1,9 +1,10 @@
 # 创建虚拟网络。
 resource "azurerm_virtual_network" "virtual_network" {
-  name                = "AZ-VNet-${title(var.customer)}-${title(var.environment)}"
-  resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
-  address_space       = [var.virtual_network_cidr]
-  dns_servers         = var.virtual_network_dns
-  location            = var.location
-  tags                = var.tag
+  for_each            = var.vnet_spec
+  name                = "AZ-VNet-${title(var.customer)}-${upper(each.key)}"
+  resource_group_name = "AZ-RG-${title(var.customer)}-${upper(each.key)}"
+  address_space       = each.value.cidr
+  dns_servers         = each.value.dns != [] ? each.value.dns : null
+  location            = each.value.location
+  tags                = each.value.tag
 }

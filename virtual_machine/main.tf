@@ -41,6 +41,7 @@ resource "azurerm_availability_set" "avset" {
 
 # 创建备份策略。
 resource "azurerm_backup_policy_vm" "backup_policy_vm" {
+  depends_on          = [azurerm_linux_virtual_machine.vm,azurerm_windows_virtual_machine.vm]
   name                = "AZ-BPVM-${title(var.customer)}-${upper(var.environment)}-${title(var.project)}"
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
@@ -85,7 +86,7 @@ resource "azurerm_network_interface" "nic" {
 
 # 创建Linux虚拟机。
 resource "azurerm_linux_virtual_machine" "vm" {
-  depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset,azurerm_backup_policy_vm.backup_policy_vm]
+  depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset]
   for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "linux" }
   name                            = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}"
   location                        = var.location
@@ -139,18 +140,17 @@ resource "azurerm_virtual_machine_data_disk_attachment" "linux_data_disk_attachm
 
 # 启用Linux虚拟机备份。
 resource "azurerm_backup_protected_vm" "backup_protected_linux_vm" {
-  depends_on          = [azurerm_linux_virtual_machine.vm]
+  depends_on          = [azurerm_backup_policy_vm.backup_policy_vm]
   for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.backup && s.type == "linux" }
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
   source_vm_id        = azurerm_linux_virtual_machine.vm[each.key].id
   backup_policy_id    = azurerm_backup_policy_vm.backup_policy_vm.id
-  tags                = var.tag
 }
 
 # 创建Windows虚拟机。
 resource "azurerm_windows_virtual_machine" "vm" {
-  depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset,azurerm_backup_policy_vm.backup_policy_vm]
+  depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset]
   for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "windows" }
   name                            = "AZ-VM-${title(var.customer)}-${upper(substr(var.environment,0,1))}-${title(var.project)}-${each.key}"
   location                        = var.location
@@ -203,13 +203,12 @@ resource "azurerm_virtual_machine_data_disk_attachment" "windows_data_disk_attac
 
 # 启用Windows虚拟机备份。
 resource "azurerm_backup_protected_vm" "backup_protected_windows_vm" {
-  depends_on          = [azurerm_windows_virtual_machine.vm]
+  depends_on          = [azurerm_backup_policy_vm.backup_policy_vm]
   for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.backup && s.type == "windows" }
   resource_group_name = "AZ-RG-${title(var.customer)}-${title(var.environment)}"
   recovery_vault_name = "AZ-RSV-${title(var.customer)}-${title(var.environment)}"
   source_vm_id        = azurerm_windows_virtual_machine.vm[each.key].id
   backup_policy_id    = azurerm_backup_policy_vm.backup_policy_vm.id
-  tags                = var.tag
 }
 
 # 安装Windows虚拟机扩展插件。
