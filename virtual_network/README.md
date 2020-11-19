@@ -9,4 +9,10 @@ module "virtual_network" {
   customer   = var.customer
   vnet_spec  = var.vnet_spec
 }
+output "virtual_network" {
+  value = module.virtual_network.azurerm_virtual_network_id
+}
+output "virtual_network_peering" {
+  value = module.virtual_network.azurerm_virtual_network_peering_id
+}
 ```

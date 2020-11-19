@@ -4,8 +4,11 @@
 #### Usage
 ```hcl
 module "resource_group" {
-  source      = "../terraform-module-azure/resource_group"
-  customer    = var.customer
-  rg_spec     = var.rg_spec
+  source   = "../terraform-module-azure/resource_group"
+  customer = var.customer
+  rg_spec  = var.rg_spec
+}
+output "resource_group" {
+  value = module.resource_group.resource_group_id
 }
 ```

@@ -3,13 +3,14 @@
 
 #### Usage
 ```hcl
-module "storage_account" {
-  depends_on  = [module.resource_group]
-  source      = "../../../terraform-module-azure/storage_account"
+module "recovery_services_vault" {
+  source      = "../../terraform-module-azure/recovery_services_vault"
   location    = var.location
   environment = var.environment
   customer    = var.customer
   tag         = var.tag
-  sa_spec     = var.sa_spec
+}
+output "recovery_services_vault" {
+  value = module.recovery_services_vault.azurerm_recovery_services_vault_id
 }
 ```
