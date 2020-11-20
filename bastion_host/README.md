@@ -7,7 +7,7 @@
 ```hcl
 module "bastion_host" {
   depends_on              = [module.resource_group,module.virtual_network]
-  source                  = "../../../terraform-module-azure/bastion_host"
+  source                  = ""
   location                = var.location
   environment             = var.environment
   customer                = var.customer

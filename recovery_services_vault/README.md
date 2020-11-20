@@ -4,11 +4,11 @@
 #### Usage
 ```hcl
 module "recovery_services_vault" {
-  source      = "../../terraform-module-azure/recovery_services_vault"
-  location    = var.location
-  environment = var.environment
-  customer    = var.customer
-  tag         = var.tag
+  source   = ""
+  location = var.location
+  env      = var.env
+  customer = var.customer
+  tag      = var.tag
 }
 output "recovery_services_vault" {
   value = module.recovery_services_vault.azurerm_recovery_services_vault_id

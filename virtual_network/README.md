@@ -5,7 +5,7 @@
 ```hcl
 module "virtual_network" {
   depends_on = [module.resource_group]
-  source     = "../terraform-module-azure/virtual_network"
+  source     = ""
   customer   = var.customer
   vnet_spec  = var.vnet_spec
 }

@@ -5,14 +5,12 @@
 ```hcl
 module "network_security_group" {
   count                = var.security_group_ass ? 1 : 0
-  depends_on           = [module.resource_group,module.virtual_network]
-  source               = "../../../terraform-module-azure/network_security_group"
+  source               = ""
   location             = var.location
-  environment          = var.environment
+  env                  = var.env
   project              = var.project
   customer             = var.customer
   tag                  = var.tag
   security_group_rules = var.security_group_rules
 }
-
 ```

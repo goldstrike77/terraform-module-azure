@@ -1,4 +1,4 @@
 variable "location" {}
-variable "environment" {}
+variable "env" {}
 variable "customer" {}
 variable "tag" { type = map }

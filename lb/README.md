@@ -2,7 +2,7 @@
 ```hcl
 module "lb" {
   depends_on        = [module.subnet,module.virtual_machine]
-  source            = "../../../terraform-module-azure/lb"
+  source            = ""
   location          = var.location
   environment       = var.environment
   project           = var.project

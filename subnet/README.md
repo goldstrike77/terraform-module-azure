@@ -5,9 +5,9 @@
 ```hcl
 module "subnet" {
   depends_on         = [module.network_security_group]
-  source             = "../../../terraform-module-azure/subnet"
+  source             = ""
   location           = var.location
-  environment        = var.environment
+  env                = var.env
   project            = var.project
   customer           = var.customer
   tag                = var.tag

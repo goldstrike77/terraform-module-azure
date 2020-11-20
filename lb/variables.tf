@@ -1,5 +1,5 @@
 variable "location" {}
-variable "environment" {}
+variable "env" {}
 variable "customer" {}
 variable "project" {}
 variable "tag" { type = map }
