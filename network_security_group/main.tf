@@ -17,5 +17,12 @@ resource "azurerm_network_security_rule" "security_rule" {
   access                       = each.value.access
   priority                     = each.value.priority
   protocol                     = each.value.protocol
-  destination_port_range       = length(each.value.destination_port_range[*]) == 1 ? each.value.destination_port_range : null
+  source_address_prefix        = lookup(each.value, "source_address_prefix", null)
+  source_address_prefixes      = lookup(each.value, "source_address_prefixes", null)
+  destination_address_prefix   = lookup(each.value, "destination_address_prefix", null)
+  destination_address_prefixes = lookup(each.value, "destination_address_prefixes", null)
+  source_port_range            = lookup(each.value, "source_port_range", null)
+  source_port_ranges           = lookup(each.value, "source_port_ranges", null)
+  destination_port_range       = lookup(each.value, "destination_port_range", null)
+  destination_port_ranges      = lookup(each.value, "destination_port_ranges", null)
 }

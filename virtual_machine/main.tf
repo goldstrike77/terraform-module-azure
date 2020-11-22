@@ -150,18 +150,18 @@ resource "azurerm_backup_protected_vm" "backup_protected_linux_vm" {
 
 # 创建Windows虚拟机。
 resource "azurerm_windows_virtual_machine" "vm" {
-  depends_on                      = [azurerm_network_interface.nic, azurerm_availability_set.avset]
-  for_each                        = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "windows" }
-  name                            = "vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
-  location                        = var.location
-  resource_group_name             = "rg-${title(var.customer)}-${upper(var.env)}"
-  availability_set_id             = azurerm_availability_set.avset.id
-  network_interface_ids           = [azurerm_network_interface.nic[each.key].id]
-  size                            = each.value.size
-  computer_name                   = "${title(var.customer)}-${upper(substr(var.env,0,1))}-${title(var.project)}-${each.key}"
-  admin_username                  = var.vm_user
-  admin_password                  = var.vm_pass
-  tags                            = var.tag
+  depends_on            = [azurerm_network_interface.nic, azurerm_availability_set.avset]
+  for_each              = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1 ) => s if s.type == "windows" }
+  name                  = "vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
+  location              = var.location
+  resource_group_name   = "rg-${title(var.customer)}-${upper(var.env)}"
+  availability_set_id   = azurerm_availability_set.avset.id
+  network_interface_ids = [azurerm_network_interface.nic[each.key].id]
+  size                  = each.value.size
+  computer_name         = "${title(var.customer)}-${upper(substr(var.env,0,1))}-${title(var.project)}-${each.key}"
+  admin_username        = var.vm_user
+  admin_password        = var.vm_pass
+  tags                  = var.tag
   os_disk {
     name                 = "osdisk-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
     caching              = each.value.disc_type == "Premium_LRS" ? "None" : "ReadWrite"
