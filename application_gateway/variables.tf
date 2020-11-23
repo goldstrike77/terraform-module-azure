@@ -3,6 +3,6 @@ variable "env" {}
 variable "customer" {}
 variable "project" {}
 variable "tag" { type = map }
-variable "subnet_id" {}
 variable "network_interface" {}
-variable "lb_spec" {}
+variable "agw_public" {}
+variable "agw_spec" {}

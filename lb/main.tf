@@ -1,7 +1,7 @@
 # 将通过变量传入的负载均衡器属性映射投影到每个变量都有单独元素的集合。
 locals {
   lb_flat = flatten([
-    for s in var.vm_spec : [
+    for s in var.lb_spec : [
       for i in range(s.count) : [
         for k in s.lb_spec : {
           component     = s.component
@@ -20,7 +20,7 @@ locals {
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip_lb" {
   for_each            = { for s in local.lb_flat : s.component => s... if s.public && s.protocol != null }
-  name                = "pip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
+  name                = "pip-lb-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   sku                 = "Standard"
@@ -40,7 +40,7 @@ resource "azurerm_lb" "public_lb" {
     iterator = pub
     for_each = { for s in local.lb_flat : s.component => s... if s.public && s.protocol != null }
     content {
-      name                 = "pip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${pub.key}"
+      name                 = "pip-lb-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${pub.key}"
       public_ip_address_id = azurerm_public_ip.public_ip_lb[pub.key].id
     }
   }
@@ -57,7 +57,7 @@ resource "azurerm_lb" "internal_lb" {
     iterator = pub
     for_each = { for s in local.lb_flat : s.component => s... if s.protocol != null }
     content {
-      name                          = "ip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${pub.key}"
+      name                          = "ip-lb-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${pub.key}"
       subnet_id                     = var.subnet_id
       private_ip_address_allocation = "Dynamic"
     }
@@ -87,7 +87,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "network_i
   depends_on              = [azurerm_lb.public_lb]
   for_each                = { for s in local.lb_flat : format("%s%02d", s.component, s.index+1) => s... if s.public && s.protocol != null }
   network_interface_id    = var.network_interface[each.key]
-  ip_configuration_name   = "ip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
+  ip_configuration_name   = "ip-vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
   backend_address_pool_id = azurerm_lb_backend_address_pool.lb_backend_address_pool_public[each.value[0].component].id
 }
 
@@ -96,7 +96,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "network_i
   depends_on              = [azurerm_lb.internal_lb]
   for_each                = { for s in local.lb_flat : format("%s%02d", s.component, s.index+1) => s... if s.protocol != null }
   network_interface_id    = var.network_interface[each.key]
-  ip_configuration_name   = "ip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
+  ip_configuration_name   = "ip-vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
   backend_address_pool_id = azurerm_lb_backend_address_pool.lb_backend_address_pool_internal[each.value[0].component].id
 }
 
@@ -134,7 +134,7 @@ resource "azurerm_lb_rule" "lb_rule_public" {
   backend_port                   = each.value[0].backend_port
   probe_id                       = lower(each.value[0].protocol) == "tcp" ? azurerm_lb_probe.lb_probe_public[each.key].id : null
   backend_address_pool_id        = azurerm_lb_backend_address_pool.lb_backend_address_pool_public[each.value[0].component].id
-  frontend_ip_configuration_name = "pip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
+  frontend_ip_configuration_name = "pip-lb-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
 }
 
 # 创建内部负载均衡器规则。
@@ -149,7 +149,7 @@ resource "azurerm_lb_rule" "lb_rule_internal" {
   backend_port                   = each.value[0].backend_port
   probe_id                       = lower(each.value[0].protocol) == "tcp" ? azurerm_lb_probe.lb_probe_internal[each.key].id : null
   backend_address_pool_id        = azurerm_lb_backend_address_pool.lb_backend_address_pool_internal[each.value[0].component].id
-  frontend_ip_configuration_name = "ip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
+  frontend_ip_configuration_name = "ip-lb-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
 }
 
 # 创建负载均衡器入站网络地址转换规则。
@@ -162,5 +162,5 @@ resource "azurerm_lb_nat_rule" "lb_nat_rule" {
   protocol                       = lower(each.value[0].protocol)
   frontend_port                  = each.value[0].frontend_port
   backend_port                   = each.value[0].backend_port
-  frontend_ip_configuration_name = "lbe-pip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
+  frontend_ip_configuration_name = "lbe-pip-nat-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.value[0].component}"
 }
