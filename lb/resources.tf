@@ -1,22 +1,3 @@
-# 将通过变量传入的负载均衡器属性映射投影到每个变量都有单独元素的集合。
-locals {
-  lb_flat = flatten([
-    for s in var.lb_spec : [
-      for i in range(s.count) : [
-        for k in s.lb_spec : {
-          component     = s.component
-          nat           = k.nat
-          public        = k.public
-          protocol      = k.protocol
-          frontend_port = k.frontend_port
-          backend_port  = k.backend_port
-          index         = i
-        }
-      ]
-    ]
-  ])
-}
-
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip_lb" {
   for_each            = { for s in local.lb_flat : s.component => s... if s.public && s.protocol != null }

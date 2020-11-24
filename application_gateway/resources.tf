@@ -1,21 +1,3 @@
-# 将通过变量传入的应用程序网关属性映射投影到每个变量都有单独元素的集合。
-locals {
-  agw_flat = flatten([
-    for s in var.agw_spec : [
-      for i in range(s.count) : [
-        for k in s.lb_spec : {
-          component     = s.component
-          public        = k.public
-          protocol      = k.protocol
-          frontend_port = k.frontend_port
-          backend_port  = k.backend_port
-          index         = i
-        }
-      ]
-    ]
-  ])
-}
-
 # 获取应用程序网关子网编号。
 data "azurerm_subnet" "subnet_agw" {
   name                 = "snet-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-application-gateway"
@@ -25,7 +7,7 @@ data "azurerm_subnet" "subnet_agw" {
 
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip_agw" {
-  count               = var.agw_public ? 1 : 0
+  count               = lookup(var.agw_spec, "public", false) ? 1 : 0
   name                = "pip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
@@ -40,25 +22,43 @@ resource "azurerm_application_gateway" "application_gateway" {
   name                = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   location            = var.location
-  enable_http2        = true
+  enable_http2        = lookup(var.agw_spec, "enable_http2", false)
+  tags                = var.tag
   sku {
-    name     = "Standard_Small"
-    tier     = "Standard"
-    capacity = 2
+    name = lookup(var.agw_spec, "name", "Standard_Small")
+    tier = lookup(var.agw_spec, "tier", "Standard")
+  }
+  autoscale_configuration {
+    min_capacity = lookup(var.agw_spec, "capacity.min", 1)
+    max_capacity = lookup(var.agw_spec, "capacity.max", 3)
+  }
+  frontend_ip_configuration {
+    name                          = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-frontend-ip"
+    private_ip_address_allocation = "Dynamic"
+    public_ip_address_id          = lookup(var.agw_spec, "public", false) ? azurerm_public_ip.public_ip_agw.id : null
   }
   gateway_ip_configuration {
     name      = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-configuration"
     subnet_id = data.azurerm_subnet.subnet_agw.id
   }
-  frontend_ip_configuration {
-    name                          = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
-    private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = var.agw_public ? azurerm_public_ip.public_ip_agw.id : null
+  dynamic "frontend_port" {
+    for_each = lookup(var.agw_spec, "listener", [])
+    content {
+      name = frontend_port.value[name]
+      port = frontend_port.value[frontend_port]
+    }
   }
-  frontend_port {
-    name = local.frontend_port_name
-    port = 80
+  dynamic "http_listener" {
+    for_each = lookup(var.agw_spec, "listener", [])
+    content {
+      name                           = http_listener.value[name]
+      frontend_ip_configuration_name = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-frontend-ip"
+      frontend_port_name             = http_listener.value[frontend_port]
+      host_names                     = http_listener.value[fqdn]
+      protocol                       = http_listener.value[http_listener.value[name]]
+    }
   }
+
 
   backend_address_pool {
     name = local.backend_address_pool_name
@@ -72,18 +72,7 @@ resource "azurerm_application_gateway" "application_gateway" {
     request_timeout       = 60
   }
 
-  dynamic "http_listener" {
-    iterator = pub
-    for_each = { for s in local.agw_flat : s.component => s... if s.public && s.protocol != null }
-    content {
-        name                           = "%{ if http_listener.value.protocol == "https" }${http_listener.value.fqdn}-${http_listener.value.port}-${local.https_listener_name}%{ else }${http_listener.value.fqdn}-${local.http_listener_name}%{ endif }"  
-        frontend_ip_configuration_name = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
-        frontend_port_name             = http_listener.value.port
-        host_name                      = http_listener.value.fqdn
-        protocol                       = upper(http_listener.value.protocol)
-        ssl_certificate_name           = "%{ if http_listener.value.protocol == "https" }${data.azurerm_key_vault_secret.cert_fe.name}%{ endif }" 
-      }
-  }
+
   dynamic "request_routing_rule" {
     iterator = pub
     for_each = { for s in local.agw_flat : s.component => s... if s.public && s.protocol != null }
