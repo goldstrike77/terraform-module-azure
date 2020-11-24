@@ -1,15 +1,12 @@
 #### Usage
 ```hcl
-module "lb" {
-  depends_on        = [module.subnet,module.virtual_machine]
-  source            = ""
-  location          = var.location
-  environment       = var.environment
-  project           = var.project
-  customer          = var.customer
-  tag               = var.tag
-  subnet_id         = module.subnet.azurerm_subnet_id
-  network_interface = module.virtual_machine.azurerm_network_interface
-  vm_spec           = var.vm_spec
+module "application_gateway" {
+  depends_on = [module.subnet]
+  source     = ""
+  location   = var.location
+  env        = var.env
+  customer   = var.customer
+  tag        = var.tag
+  agw_spec   = var.agw_spec
 }
 ```

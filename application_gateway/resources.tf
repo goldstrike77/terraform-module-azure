@@ -8,7 +8,7 @@ data "azurerm_subnet" "subnet_agw" {
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip_agw" {
   count               = lookup(var.agw_spec, "public", false) ? 1 : 0
-  name                = "pip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
+  name                = "pip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   sku                 = "Standard"
@@ -18,70 +18,78 @@ resource "azurerm_public_ip" "public_ip_agw" {
 
 # 创建应用程序网关。
 resource "azurerm_application_gateway" "application_gateway" {
-  depends_on          = [azurerm_subnet.subnet_agw,azurerm_lb.public_ip_agw]
-  name                = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
+  depends_on          = [data.azurerm_subnet.subnet_agw,azurerm_public_ip.public_ip_agw]
+  name                = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   location            = var.location
   enable_http2        = lookup(var.agw_spec, "enable_http2", false)
   tags                = var.tag
   sku {
-    name = lookup(var.agw_spec, "name", "Standard_Small")
-    tier = lookup(var.agw_spec, "tier", "Standard")
+    name     = lookup(var.agw_spec, "name", "Standard_Small")
+    tier     = lookup(var.agw_spec, "tier", "Standard")
+    capacity = 2
   }
+  /*
   autoscale_configuration {
-    min_capacity = lookup(var.agw_spec, "capacity.min", 1)
+    min_capacity = lookup(var.agw_spec, "capacity.min", 0)
     max_capacity = lookup(var.agw_spec, "capacity.max", 3)
   }
+  */
   frontend_ip_configuration {
-    name                          = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-frontend-ip"
+    name                          = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-frontend-ip"
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          = lookup(var.agw_spec, "public", false) ? azurerm_public_ip.public_ip_agw.id : null
+    public_ip_address_id          = lookup(var.agw_spec, "public", false) ? azurerm_public_ip.public_ip_agw[0].id : null
   }
   gateway_ip_configuration {
-    name      = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-configuration"
+    name      = "agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-cfg"
     subnet_id = data.azurerm_subnet.subnet_agw.id
   }
   dynamic "frontend_port" {
+    iterator = pub
     for_each = lookup(var.agw_spec, "listener", [])
     content {
-      name = frontend_port.value[name]
-      port = frontend_port.value[frontend_port]
+      name = "agw-frontend-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.value.port}"
+      port = pub.value.port
     }
   }
   dynamic "http_listener" {
+    iterator = pub
     for_each = lookup(var.agw_spec, "listener", [])
     content {
-      name                           = http_listener.value[name]
-      frontend_ip_configuration_name = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-frontend-ip"
-      frontend_port_name             = http_listener.value[frontend_port]
-      host_names                     = http_listener.value[fqdn]
-      protocol                       = http_listener.value[http_listener.value[name]]
+      name                           = "agw-listener-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.value.protocol}"
+      frontend_ip_configuration_name = "ip-agw-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-frontend-ip"
+      frontend_port_name             = "agw-frontend-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.value.port}"
+      protocol                       = pub.value.protocol
     }
   }
-
-
-  backend_address_pool {
-    name = local.backend_address_pool_name
+  dynamic "backend_address_pool" {
+    iterator = pub
+    for_each = { for s in local.agw_backend : s.fqdns => s... if s.fqdns != null }
+    content {
+      name  = "agw-backend-address-pool-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.key}"
+      fqdns = [pub.key]
+    }
   }
-  backend_http_settings {
-    name                  = local.http_setting_name
-    cookie_based_affinity = "Disabled"
-    path                  = "/path1/"
-    port                  = 80
-    protocol              = "Http"
-    request_timeout       = 60
+  dynamic "backend_http_settings" {
+    iterator = pub
+    for_each = { for s in local.agw_backend : format("%s-%s", s.fqdns, s.port) => s... if s.fqdns != null }
+    content {
+      name                  = "agw-backend-http-settings-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.key}"
+      cookie_based_affinity = "Disabled"
+      port                  = pub.value[0].port
+      protocol              = pub.value[0].protocol
+      request_timeout       = 60
+    }
   }
-
-
   dynamic "request_routing_rule" {
     iterator = pub
-    for_each = { for s in local.agw_flat : s.component => s... if s.public && s.protocol != null }
+    for_each = { for s in local.agw_backend : format("%s-%s", s.fqdns, s.port) => s... if s.fqdns != null }
     content {
-        name                        = "%{ if request_routing_rule.value.protocol == "https" }${request_routing_rule.value.fqdn}-${request_routing_rule.value.port}%{ else }${request_routing_rule.value.fqdn}-redirect%{ endif }"  
-        rule_type                   = "Basic"
-        http_listener_name          = "%{ if request_routing_rule.value.protocol == "https" }${request_routing_rule.value.fqdn}-${request_routing_rule.value.port}-${local.https_listener_name}%{ else }${request_routing_rule.value.fqdn}-${local.http_listener_name}%{ endif }"
-        backend_address_pool_name   = "%{ if request_routing_rule.value.protocol == "https" }${request_routing_rule.value.fqdn}%{ endif }" 
-        backend_http_settings_name  = "%{ if request_routing_rule.value.protocol == "https" }${request_routing_rule.value.fqdn}-${local.backend_https_settings_name}%{ endif }" 
+      name                       = "agw-request-routing-rule-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.key}"
+      rule_type                  = "Basic"
+      http_listener_name         = "agw-listener-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.value[0].protocol}"
+      backend_address_pool_name  = "agw-backend-address-pool-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.value[0].fqdns}"
+      backend_http_settings_name = "agw-backend-http-settings-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${pub.key}"
     }
   }
 }
