@@ -6,6 +6,7 @@ resource "azurerm_public_ip" "public_ip_lb" {
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   sku                 = "Standard"
   allocation_method   = "Static"
+  domain_name_label   = "pip-lb-${title(var.customer)}-${lower(var.env)}-${lower(var.project)}-${each.key}"
   tags                = var.tag
 }
 

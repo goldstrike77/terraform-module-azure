@@ -7,12 +7,13 @@ resource "azurerm_subnet" "subnet" {
 }
 
 # 创建堡垒机公共IP地址。
-resource "azurerm_public_ip" "public_ip" {
-  name                = "pip-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-Bastion"
+resource "azurerm_public_ip" "public_bastion" {
+  name                = "pip-bastion-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   allocation_method   = "Static"
   sku                 = "Standard"
+  domain_name_label   = "pip-bastion-${lower(var.customer)}-${lower(var.env)}"
   tags                = var.tag
 }
 
@@ -25,6 +26,6 @@ resource "azurerm_bastion_host" "bastion_host" {
   ip_configuration {
     name                 = "configuration"
     subnet_id            = azurerm_subnet.subnet.id
-    public_ip_address_id = azurerm_public_ip.public_ip.id
+    public_ip_address_id = azurerm_public_ip.public_bastion.id
   }
 }

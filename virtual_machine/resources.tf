@@ -4,6 +4,13 @@ data "azurerm_storage_account" "storage_account" {
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
 }
 
+# 获取虚拟机子网编号。
+data "azurerm_subnet" "subnet_vm" {
+  name                 = "snet-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
+  resource_group_name  = "rg-${title(var.customer)}-${upper(var.env)}"
+  virtual_network_name = "vnet-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
+}
+
 # 创建可用性集。
 resource "azurerm_availability_set" "avset" {
   name                         = "avail-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
@@ -21,13 +28,13 @@ resource "azurerm_backup_policy_vm" "backup_policy_vm" {
   name                = "policy-${title(var.customer)}-${upper(var.env)}-${title(var.project)}-vm"
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   recovery_vault_name = "rsv-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
-  timezone            = var.vm_backup_timezone
+  timezone            = lookup(var.vm_backup, "timezone", "China Standard Time")
   backup {
-    frequency = title(var.vm_backup_frequency)
-    time      = var.vm_backup_time
+    frequency = title(lookup(var.vm_backup, "frequency", "daily"))
+    time      = lookup(var.vm_backup, "time", "23:00")
   }
   retention_daily {
-    count = var.vm_backup_count
+    count = lookup(var.vm_backup, "count", 7)
   }
 }
 
@@ -39,6 +46,7 @@ resource "azurerm_public_ip" "public_ip" {
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   sku                 = "Standard"
   allocation_method   = "Static"
+  domain_name_label   = "pip-vm-${lower(var.customer)}-${lower(var.env)}-${lower(var.project)}-${each.key}"
   tags                = var.tag
 }
 
@@ -54,7 +62,7 @@ resource "azurerm_network_interface" "nic" {
   tags                          = var.tag
   ip_configuration {
     name                          = "ip-vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
-    subnet_id                     = var.subnet_id
+    subnet_id                     = data.azurerm_subnet.subnet_vm.id
     private_ip_address_allocation = "dynamic"
     public_ip_address_id          = each.value.vm_public ? azurerm_public_ip.public_ip[each.key].id : null
   }
@@ -71,8 +79,8 @@ resource "azurerm_linux_virtual_machine" "vm" {
   network_interface_ids           = [azurerm_network_interface.nic[each.key].id]
   size                            = each.value.size
   computer_name                   = "${title(var.customer)}-${upper(substr(var.env,0,1))}-${title(var.project)}-${each.key}"
-  admin_username                  = var.vm_user
-  admin_password                  = var.vm_pass
+  admin_username                  = lookup(var.vm_auth, "user", "oper")
+  admin_password                  = lookup(var.vm_auth, "pass", "aGhQpYPQd9vzPH8k")
   disable_password_authentication = false
   tags                            = var.tag
   os_disk {
@@ -135,8 +143,8 @@ resource "azurerm_windows_virtual_machine" "vm" {
   network_interface_ids = [azurerm_network_interface.nic[each.key].id]
   size                  = each.value.size
   computer_name         = "${title(var.customer)}-${upper(substr(var.env,0,1))}-${title(var.project)}-${each.key}"
-  admin_username        = var.vm_user
-  admin_password        = var.vm_pass
+  admin_username        = lookup(var.vm_auth, "user", "oper")
+  admin_password        = lookup(var.vm_auth, "pass", "aGhQpYPQd9vzPH8k")
   tags                  = var.tag
   os_disk {
     name                 = "osdisk-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"

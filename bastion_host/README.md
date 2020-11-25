@@ -6,10 +6,9 @@
 #### Usage
 ```hcl
 module "bastion_host" {
-  depends_on              = [module.resource_group,module.virtual_network]
   source                  = ""
   location                = var.location
-  environment             = var.environment
+  env                     = var.env
   customer                = var.customer
   tag                     = var.tag
   bastion_subnet_prefixes = var.bastion_subnet_prefixes
