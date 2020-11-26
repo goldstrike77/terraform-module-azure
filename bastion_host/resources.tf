@@ -19,7 +19,7 @@ resource "azurerm_public_ip" "public_bastion" {
 
 # 创建堡垒机。
 resource "azurerm_bastion_host" "bastion_host" {
-  name                = "bst-${title(var.customer)}-${upper(substr(var.env,0,1))}-${lower(var.location)}"
+  name                = "bst-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
   tags                = var.tag  
