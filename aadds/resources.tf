@@ -46,20 +46,20 @@ resource "azurerm_template_deployment" "aadds" {
     "vnetResourceGroup": {
       "type": "string"
     }
-  },
-  "resources": [{
-      "type": "Microsoft.AAD/DomainServices",
-      "name": "[parameters('name')]",
-      "apiVersion": "[parameters('apiVersion')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [],
-      "properties": {
-        "domainName": "[parameters('domainName')]",
-        "subnetId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vnetResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetName'))]"
-      }
-    }
-  ],
-  "outputs": {}
+  },  
+    "resources": [{
+        "apiVersion": "[parameters('apiVersion')]",
+        "type": "Microsoft.AAD/DomainServices",
+        "name": "[parameters('name')]",
+        "location": "[parameters('location')]",
+        "properties": {
+          "domainName": "[parameters('domainName')]",
+          "subnetId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vnetResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetName'))]",
+          "filteredSync": "[parameters('filteredSync')]",
+          "domainConfigurationType": "[parameters('domainConfigurationType')]"
+        }
+    }],
+    "outputs": {}
 }
 DEPLOY
 }
