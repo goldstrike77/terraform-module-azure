@@ -16,62 +16,50 @@ resource "azurerm_template_deployment" "aadds" {
   deployment_mode    = "Incremental"
   template_body      = <<DEPLOY
 {
-    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-    "contentVersion": "1.0.0.0",
-    "parameters": {
-        "name": {
-            "type": "string"
-        },
-        "apiVersion": {
-            "type": "string"
-        },
-        "domainConfigurationType": {
-            "type": "string"
-        },
-        "domainName": {
-            "type": "string"
-        },
-        "filteredSync": {
-            "type": "string"
-        },
-        "location": {
-            "type": "string"
-        },
-        "subnetName": {
-            "type": "string"
-        },
-        "vnetName": {
-            "type": "string"
-        },
-        "vnetResourceGroup": {
-            "type": "string"
-        }
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "name": {
+      "type": "string"
     },
-    "resources": [
-        {
-            "apiVersion": "[parameters('apiVersion')]",
-            "type": "Microsoft.AAD/DomainServices",
-            "name": "[parameters('name')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "domainName": "[parameters('domainName')]",
-                "subnetId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vnetResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetName'))]",
-                "filteredSync": "[parameters('filteredSync')]",
-                "ldapsSettings": {
-                    "ldaps": "Enabled",
-                    "pfxCertificate": "string",
-                    "pfxCertificatePassword": "string",
-                    "externalAccess": "Enabled"
-                },
-                "notificationSettings": {
-                    "notifyGlobalAdmins": "Enabled",
-                    "notifyDcAdmins": "Enabled",
-                    "additionalRecipients": []
-                }
-            }
-        }
-    ],
-    "outputs": {}
+    "apiVersion": {
+      "type": "string"
+    },
+    "domainConfigurationType": {
+      "type": "string"
+    },
+    "domainName": {
+      "type": "string"
+    },
+    "filteredSync": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "subnetName": {
+      "type": "string"
+    },
+    "vnetName": {
+      "type": "string"
+    },
+    "vnetResourceGroup": {
+      "type": "string"
+    }
+  },
+  "resources": [{
+      "type": "Microsoft.AAD/DomainServices",
+      "name": "[parameters('name')]",
+      "apiVersion": "[parameters('apiVersion')]",
+      "location": "[parameters('location')]",
+      "dependsOn": [],
+      "properties": {
+        "domainName": "[parameters('domainName')]",
+        "subnetId": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', parameters('vnetResourceGroup'), '/providers/Microsoft.Network/virtualNetworks/', parameters('vnetName'), '/subnets/', parameters('subnetName'))]"
+      }
+    }
+  ],
+  "outputs": {}
 }
 DEPLOY
 }

@@ -1,15 +1,15 @@
+#### Requirements
+- [Grant Azure Active Directory permissions for Service Principal.](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/guides/service_principal_configuration)
+- [Create required Azure AD resources.](https://docs.microsoft.com/en-us/azure/active-directory-domain-services/template-create-instance)
+
 #### Usage
 ```hcl
-module "subnet" {
-  depends_on         = [module.network_security_group]
-  source             = ""
-  location           = var.location
-  env                = var.env
-  project            = var.project
-  customer           = var.customer
-  tag                = var.tag
-  subnet_prefixes    = var.subnet_prefixes
-  security_group_ass = var.security_group_ass
-  security_group_id  = ( var.security_group_ass ? module.network_security_group[0].net_security_group_id : 0 )
+module "aadds" {
+  depends_on = [module.subnet]
+  source     = "/home/suzhetao/terraform/terraform-module-azure/aadds"
+  location   = var.location
+  env        = var.env
+  customer   = var.customer
+  aadds_spec = var.aadds_spec
 }
 ```
