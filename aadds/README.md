@@ -1,4 +1,4 @@
-#### 创建时间大致需要一小时，不知道如何控制活动目录域服务托管域自动关联创建负载均衡器，公共地址和实例网卡，无法选择SKU，部署模板接口文档里没有相关参数，谁知道的教我一下，一百元红包奖励。
+#### 创建时间大致需要一小时，不知道如何控制活动目录域服务托管自动关联创建负载均衡器，公共地址和实例网卡，无法选择SKU，部署模板接口文档里没有相关参数，谁知道的教我一下，一百元红包奖励。
 
 #### Requirements
 - [Grant Azure Active Directory permissions for Service Principal.](https://registry.terraform.io/providers/hashicorp/azuread/latest/docs/guides/service_principal_configuration)
