@@ -5,7 +5,7 @@
 - [Create required Azure AD resources.](https://docs.microsoft.com/en-us/azure/active-directory-domain-services/template-create-instance)
 
 #### Usage
-```hcl
+```terraform
 module "network_security_group" {
   source               = ""
   location             = var.location
@@ -40,7 +40,7 @@ module "aadds" {
 ```
 
 #### Variables
-```json
+```terraform
 variable "geography" {}
 
 variable "location" {
