@@ -37,5 +37,65 @@ module "aadds" {
   customer   = var.customer
   aadds_spec = var.aadds_spec
 }
+```
 
+#### Variables
+```yaml
+variable "geography" {}
+
+variable "location" {
+  default = "chinanorth2"
+}
+
+variable "env" {
+  default = "pub"
+}
+
+variable "project" {
+  default = "aadds"
+}
+
+variable "customer" {
+  default = "Learn"
+}
+
+variable "aadds_subnet_prefixes" {
+  default = "10.0.0.0/28"
+}
+
+variable "aadds_spec" {
+  default = {
+    domain = "goldstrike77.partner.onmschina.cn"
+    type   = "FullySynced"
+    sku    = "Standard"
+  }
+}
+
+variable "addds_security_group_rules" {
+  default = {
+    IBA-AzureAD-TCP = {
+      priority  = "101"
+      direction = "Inbound"
+      access    = "Allow"
+      protocol  = "Tcp"
+      source_address_prefix      = "AzureActiveDirectoryDomainServices"
+      destination_address_prefix = "*"
+      source_port_range          = "*"
+      destination_port_ranges    = ["443","5986"]
+    }
+  }
+}
+
+variable "tag" {
+  type = map
+  default = {
+    location    = "chinanorth2"
+    environment = "Pub"
+    customer    = "Learn"
+    owner       = "suzhetao"
+    email       = "suzhetao@gmail.com"
+    title       = "Engineer"
+    department  = "IS"
+  }
+}
 ```
