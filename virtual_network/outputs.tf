@@ -3,5 +3,5 @@ output "azurerm_virtual_network_id" {
 }
 
 output "azurerm_virtual_network_peering_id" {
-  value = azurerm_virtual_network_peering.virtual_network_peering.*.id
+  value = { for i, peering in azurerm_virtual_network_peering.virtual_network_peering: i => regex(".*/(.*)", peering.id) }
 }

@@ -5,7 +5,6 @@
 ```hcl
 module "resource_group" {
   source   = ""
-  customer = var.customer
   rg_spec  = var.rg_spec
 }
 output "resource_group" {

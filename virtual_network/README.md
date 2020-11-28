@@ -6,7 +6,6 @@
 module "virtual_network" {
   depends_on = [module.resource_group]
   source     = ""
-  customer   = var.customer
   vnet_spec  = var.vnet_spec
 }
 output "virtual_network" {
