@@ -40,7 +40,7 @@ module "aadds" {
 ```
 
 #### Variables
-```yaml
+```json
 variable "geography" {}
 
 variable "location" {
