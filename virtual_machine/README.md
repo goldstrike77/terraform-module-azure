@@ -172,7 +172,7 @@ variable "vm_spec" {
       sku                    = "7_8"
       version                = "latest"
       backup                 = false
-      vm_public              = false
+      public                 = false
       ip_forwarding          = false
       accelerated_networking = false
       disc_type              = "Standard_LRS"
@@ -189,7 +189,7 @@ variable "vm_spec" {
       sku                    = "7_8"
       version                = "latest"
       backup                 = false
-      vm_public              = false
+      public                 = false
       ip_forwarding          = false
       accelerated_networking = false
       disc_type              = "Standard_LRS"

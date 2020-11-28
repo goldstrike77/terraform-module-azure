@@ -11,7 +11,7 @@ locals {
         offer                  = s.offer
         sku                    = s.sku
         version                = s.version
-        vm_public              = s.vm_public
+        public                 = s.public
         ip_forwarding          = s.ip_forwarding
         accelerated_networking = s.accelerated_networking
         disc_type              = s.disc_type

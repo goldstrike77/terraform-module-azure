@@ -40,7 +40,7 @@ resource "azurerm_backup_policy_vm" "backup_policy_vm" {
 
 # 创建公共IP地址。
 resource "azurerm_public_ip" "public_ip" {
-  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.vm_public }
+  for_each            = { for s in local.vm_flat : format("%s%02d", s.component, s.index+1) => s if s.public }
   name                = "pip-vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
   location            = var.location
   resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
@@ -64,7 +64,7 @@ resource "azurerm_network_interface" "nic" {
     name                          = "ip-vm-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}-${each.key}"
     subnet_id                     = data.azurerm_subnet.subnet_vm.id
     private_ip_address_allocation = "dynamic"
-    public_ip_address_id          = each.value.vm_public ? azurerm_public_ip.public_ip[each.key].id : null
+    public_ip_address_id          = each.value.public ? azurerm_public_ip.public_ip[each.key].id : null
   }
 }
 
