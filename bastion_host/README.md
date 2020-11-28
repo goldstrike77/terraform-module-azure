@@ -14,3 +14,38 @@ module "bastion_host" {
   bastion_subnet_prefixes = var.bastion_subnet_prefixes
 }
 ```
+
+#### Variables
+```hcl
+variable "geography" {}
+
+variable "location" {
+  default = "chinanorth2"
+}
+
+variable "env" {
+  default = "prd"
+}
+
+variable "customer" {
+  default = "Learn"
+}
+
+variable "bastion_subnet_prefixes" {
+  default = "10.10.0.0/24"
+}
+
+variable "tag" {
+  type = map
+  default = {
+    location    = "chinanorth2"
+    environment = "Prd"
+    customer    = "Learn"
+    project     = "Bastion"
+    owner       = "Somebody"
+    email       = "suzhetao@gmail.com"
+    title       = "Engineer"
+    department  = "IS"
+  }
+}
+```
