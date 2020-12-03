@@ -1,9 +1,3 @@
-# 获取虚拟机启动诊断存储账户名称。
-data "azurerm_storage_account" "storage_account" {
-  name                = "sa${lower(var.customer)}${lower(substr(var.env,0,1))}bootdiag"
-  resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
-}
-
 # 获取虚拟机子网编号。
 data "azurerm_subnet" "subnet_vm" {
   name                 = "snet-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}-${title(var.project)}"
@@ -94,9 +88,7 @@ resource "azurerm_linux_virtual_machine" "vm" {
     sku       = each.value.sku
     version   = each.value.version
   }
-  boot_diagnostics {
-    storage_account_uri = data.azurerm_storage_account.storage_account.primary_blob_endpoint
-  }
+  boot_diagnostics {}
 }
 
 # 创建Linux虚拟机数据磁盘。
@@ -157,9 +149,7 @@ resource "azurerm_windows_virtual_machine" "vm" {
     sku       = each.value.sku
     version   = each.value.version
   }
-  boot_diagnostics {
-    storage_account_uri = data.azurerm_storage_account.storage_account.primary_blob_endpoint
-  }
+  boot_diagnostics {}
 }
 
 # 创建Windows虚拟机数据磁盘。
