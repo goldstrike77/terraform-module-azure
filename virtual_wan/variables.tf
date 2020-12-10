@@ -1,5 +1,5 @@
 variable "location" {}
 variable "env" {}
 variable "customer" {}
-variable "vnet_conn" {}
-variable "vnet_spec" {}
+variable "vwan_spec" {}
+variable "tag" { type = map }

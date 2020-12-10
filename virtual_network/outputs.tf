@@ -1,5 +1,5 @@
 output "azurerm_virtual_network_id" {
-  value = azurerm_virtual_network.virtual_network.*.id
+  value = { for i, vnet in azurerm_virtual_network.virtual_network: i => vnet.id }
 }
 
 output "azurerm_virtual_network_peering_id" {

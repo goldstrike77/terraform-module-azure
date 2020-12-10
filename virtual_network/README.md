@@ -6,6 +6,10 @@
 module "virtual_network" {
   depends_on = [module.resource_group]
   source     = ""
+  location   = var.location
+  env        = var.env
+  customer   = var.customer
+  vnet_conn  = var.vnet_conn
   vnet_spec  = var.vnet_spec
 }
 output "virtual_network" {
