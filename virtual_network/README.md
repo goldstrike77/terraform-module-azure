@@ -5,7 +5,7 @@
 ```hcl
 module "virtual_network" {
   depends_on = [module.resource_group]
-  source     = ""
+  source     = "git::https://github.com/goldstrike77/terraform-module-azure.git//virtual_network?ref=v0.2"
   location   = var.location
   env        = var.env
   customer   = var.customer

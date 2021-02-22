@@ -1,5 +1,5 @@
 variable "location" {}
-variable "env" {}
-variable "customer" {}
+variable "rg_name" {}
+variable "vwan_name" {}
 variable "vwan_spec" {}
-variable "tag" { type = map }
+variable "tags" { type = map }

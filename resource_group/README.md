@@ -4,7 +4,7 @@
 #### Usage
 ```hcl
 module "resource_group" {
-  source   = "git::https://github.com/goldstrike77/terraform-module-azure.git//resource_group?ref=v0.1"
+  source   = "git::https://github.com/goldstrike77/terraform-module-azure.git//resource_group?ref=v0.2"
   name     = "rg-${title(var.customer)}-${lower(var.environment)}-${title(var.project)}-Network"
   location = var.location
   tags     = var.tag
