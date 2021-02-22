@@ -1,1 +1,3 @@
-variable "rg_spec" {}
+variable "name" {}
+variable "location" {}
+variable "tags" {}
