@@ -1,4 +1,4 @@
 variable "location" {}
-variable "env" {}
-variable "customer" {}
-variable "tag" { type = map }
+variable "rsv_name" {}
+variable "rg_name" {}
+variable "tags" { type = map }

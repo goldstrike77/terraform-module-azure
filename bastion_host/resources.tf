@@ -1,28 +1,27 @@
 # 创建堡垒机专用子网。
 resource "azurerm_subnet" "subnet" {
   name                 = "AzureBastionSubnet"
-  resource_group_name  = "rg-${title(var.customer)}-${upper(var.env)}"
-  virtual_network_name = "vnet-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
+  resource_group_name  = var.bastion_vnet_rg
+  virtual_network_name = var.bastion_vnet
   address_prefixes     = [var.bastion_subnet_prefixes]
 }
 
 # 创建堡垒机公共IP地址。
 resource "azurerm_public_ip" "public_bastion" {
-  name                = "pip-bastion-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
+  name                = "pip-${var.bastion_name}"
   location            = var.location
-  resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
+  resource_group_name = var.bastion_vnet_rg
   allocation_method   = "Static"
   sku                 = "Standard"
-  domain_name_label   = "pip-bastion-${lower(var.customer)}-${lower(var.env)}"
-  tags                = var.tag
+  tags                = var.tags
 }
 
 # 创建堡垒机。
 resource "azurerm_bastion_host" "bastion_host" {
-  name                = "bst-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
+  name                = var.bastion_name
   location            = var.location
-  resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
-  tags                = var.tag  
+  resource_group_name = var.rg_name
+  tags                = var.tags
   ip_configuration {
     name                 = "configuration"
     subnet_id            = azurerm_subnet.subnet.id

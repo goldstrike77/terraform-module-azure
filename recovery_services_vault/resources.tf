@@ -1,9 +1,9 @@
 # 创建恢复服务保管库。
 resource "azurerm_recovery_services_vault" "recovery_services_vault" {
-  name                = "rsv-${title(var.customer)}-${upper(var.env)}-${lower(var.location)}"
+  name                = var.rsv_name
   location            = var.location
-  resource_group_name = "rg-${title(var.customer)}-${upper(var.env)}"
+  resource_group_name = var.rg_name
   sku                 = "Standard"
   soft_delete_enabled = false
-  tags                = var.tag
+  tags                = var.tags
 }
