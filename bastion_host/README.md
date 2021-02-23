@@ -6,46 +6,13 @@
 #### Usage
 ```hcl
 module "bastion_host" {
-  source                  = ""
+  source                  = "git::https://github.com/goldstrike77/terraform-module-azure.git//bastion_host?ref=v0.2"
+  rg_name                 = module.resource_group.resource_group_name
   location                = var.location
-  env                     = var.env
-  customer                = var.customer
-  tag                     = var.tag
+  bastion_name            = "bst-${title(var.customer)}-${lower(var.environment)}-${title(var.project)}"
+  bastion_vnet            = "vnet-${title(var.customer)}-${lower(var.environment)}-Network"
+  bastion_vnet_rg         = "rg-${title(var.customer)}-${lower(var.environment)}-Network"
   bastion_subnet_prefixes = var.bastion_subnet_prefixes
-}
-```
-
-#### Variables
-```hcl
-variable "geography" {}
-
-variable "location" {
-  default = "chinanorth2"
-}
-
-variable "env" {
-  default = "prd"
-}
-
-variable "customer" {
-  default = "Learn"
-}
-
-variable "bastion_subnet_prefixes" {
-  default = "10.10.0.0/24"
-}
-
-variable "tag" {
-  type = map
-  default = {
-    location    = "chinanorth2"
-    environment = "Prd"
-    customer    = "Learn"
-    project     = "Bastion"
-    owner       = "Somebody"
-    email       = "suzhetao@gmail.com"
-    title       = "Engineer"
-    department  = "IS"
-  }
+  tags                    = var.tags
 }
 ```
